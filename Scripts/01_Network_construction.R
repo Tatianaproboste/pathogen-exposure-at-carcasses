@@ -27,7 +27,8 @@ OUTPUT_FILE <- file.path(OUTPUT_DIR, "outputs_full.rds")
 dir.create(OUTPUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
 # Load data ---------------------------------------------------------------
-dat <- read_csv(INPUT_FILE, show_col_types = FALSE)
+dat <- read_csv(INPUT_FILE, show_col_types = FALSE) %>%
+  mutate(datetime = ymd_hms(datetime))
 
 #check years available
 table(dat$year, dat$location)
@@ -63,7 +64,7 @@ for(window in time_windows) {
   cat(paste0("    Interaction groups: ", uniqueN(tmp_data$group), "\n"))
   
   # Add ID column for network analysis
-  tmp_data[, id := paste(species, location, station, year, season, sep = "_")]
+  tmp_data[, id := paste(species, location, station, year, sep = "_")]
   
   # Calculate summary statistics
   group_summary <- tmp_data[, .(
