@@ -11,7 +11,6 @@ library(tidytext)
 library(scales)
 library(ggplot2)
 
-
 rm(list = ls())
 
 # SOURCE SHARED FUNCTIONS -------------------------------------------------
@@ -20,7 +19,6 @@ source("Scripts/_functions_shared.R", local = TRUE)
 
 # Consistent risk gradients used across visualizations in this script
 risk_palette <- unname(risk_colors[c("low", "medium", "high", "veryhigh")])
-gradient_palette <- color_palette
 
 # Location labels: short code → full region name
 location_labels <- c(KNP = "Alpine", SD = "Desert", WV = "Temperate")
@@ -73,11 +71,6 @@ carcass_deployment <- df %>%
   select(station, deployment_time, location)
 
 n_with_deploy <- sum(!is.na(df$carcass_deploy_time))
-if (n_with_deploy == 0) {
-  cat("  ⚠ carcass_deploy_time is entirely NA — using earliest detection per station as t=0\n")
-} else {
-  cat(paste0("  carcass_deploy_time available for ", n_with_deploy, " rows\n"))
-}
 
 # Calculate when each species arrived at each carcass
 arrival_timing <- df %>%
@@ -120,17 +113,6 @@ arrival_timing <- arrival_timing %>%
 cat(paste0("  Species-carcass combinations: ", nrow(arrival_timing), "\n"))
 cat(paste0("  Arrival time range: ", round(min(arrival_timing$hours_since_deployment), 1), 
            " to ", round(max(arrival_timing$hours_since_deployment), 1), " hours\n\n"))
-
-# Show example pathogen values to verify they differ by disease
-cat("  Example pathogen availability for one species-carcass (verifying disease-specific decay):\n")
-example_row <- arrival_timing[1, ]
-cat(paste0("    Species: ", example_row$species, " at carcass ", example_row$station, 
-           " (arrived at ", round(example_row$hours_since_deployment, 1), " hours)\n"))
-for (disease in disease_params$disease) {
-  pathogen_val <- example_row[[paste0("pathogen_", disease)]]
-  cat(paste0("      pathogen_", disease, ": ", round(pathogen_val, 4), "\n"))
-}
-cat("\n")
 
 # Report pathogen resistance periods (λ = persistence time)
 cat("  Pathogen resistance periods (λ):\n")
@@ -176,7 +158,7 @@ if (length(missing_species) > 0) {
   cat(paste0("  ⚠ WARNING: ", length(missing_species), " species in data but not in susceptibility file:\n"))
   cat(paste0("    ", paste(missing_species, collapse = ", "), "\n"))
   cat("    Adding conservative default susceptibility values (low risk)...\n")
-  cat("    ➜ RECOMMENDATION: Add these species to species_susceptibility.csv with proper values\n\n")
+  cat("    ➜ RECOMMENDATION: Add these species to species_susceptibility.csv with proper values\n\n")}
   
   # Create default values dynamically - use conservative (low) defaults for all diseases
   default_values <- list(
@@ -190,7 +172,6 @@ if (length(missing_species) > 0) {
   }
   
   default_susceptibility <- as_tibble(default_values)
-  susceptibility_matrix <- bind_rows(susceptibility_matrix, default_susceptibility)
   
 # =========================================================================
 # STEP 3: CALCULATE RISK FOR EACH DISEASE
@@ -352,7 +333,7 @@ create_disease_bubble_plot <- function(risk_data, disease_name, disease_fullname
              hjust = 0.5, size = 3, color = "#E76F51", fontface = "plain", family = "sans") +
     
     # Color scale - journal-style gradient (purple-navy → teal → yellow)
-    scale_fill_gradientn(colors = gradient_palette(100),
+    scale_fill_gradientn(colors = color_palette(100),
                          name = "Mean risk",
                          labels = scales::label_percent(accuracy = 1),
                          limits = fill_limits) +
@@ -505,5 +486,3 @@ combined_plot <- wrap_plots(plotlist = plot_list, ncol = 2) +
   
 ggsave(file.path(OUTPUT_DIR, "combined_bubble_plot.png"), combined_plot,
        width = 16, height = 20, dpi = 600, bg = "white")
-
-
