@@ -1,0 +1,18 @@
+# R session / IDE
+.Rhistory
+.RData
+.Rproj.user/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Keep folders, ignore private and generated contents
+Raw_data/**
+Outputs/**
+
+# Keep documentation/placeholders inside ignored folders
+!Raw_data/README*
+!Raw_data/GUIDE*
+!Raw_data/.gitkeep
+!Outputs/.gitkeep
